@@ -1,0 +1,39 @@
+name: Sync Notion Date Gap
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+  repository_dispatch:
+    types: [notion-date-gap-sync]
+
+concurrency:
+  group: notion-date-gap-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show trigger source
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "action=${{ github.event.action }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Sync Previous Relation
+        run: python src/sync_previous.py
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}

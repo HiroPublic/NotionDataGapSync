@@ -1,0 +1,10 @@
+name = "notion-date-gap-sync"
+main = "src/index.js"
+compatibility_date = "2026-05-26"
+
+[observability.logs]
+enabled = true
+
+[vars]
+GITHUB_OWNER = "HiroPublic"
+GITHUB_REPO = "NotionDataGapSync"
