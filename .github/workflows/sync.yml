@@ -1,8 +1,6 @@
 name: Sync Notion Date Gap
 
 on:
-  schedule:
-    - cron: "0 18 * * *"
   workflow_dispatch:
   repository_dispatch:
     types: [notion-date-gap-sync]
@@ -19,20 +17,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check required secrets
+        id: required-secrets
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        run: |
+          missing=0
+
+          if [ -z "$NOTION_TOKEN" ]; then
+            echo "::notice::NOTION_TOKEN is not set. Skipping sync for this repository."
+            missing=1
+          fi
+
+          if [ -z "$NOTION_DATABASE_ID" ]; then
+            echo "::notice::NOTION_DATABASE_ID is not set. Skipping sync for this repository."
+            missing=1
+          fi
+
+          if [ "$missing" -eq 0 ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Show trigger source
         run: |
           echo "event_name=${{ github.event_name }}"
           echo "action=${{ github.event.action }}"
 
       - name: Set up Python
+        if: steps.required-secrets.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
+        if: steps.required-secrets.outputs.should_run == 'true'
         run: pip install -r requirements.txt
 
       - name: Sync Previous Relation
+        if: steps.required-secrets.outputs.should_run == 'true'
         run: python src/sync_previous.py
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}

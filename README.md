@@ -33,11 +33,9 @@ The current implementation does not use Notion self-relations.
 - pages are ordered by `Date` ascending, then `created_time` ascending
 - pages without `Date` are ignored until a date is added
 
-## Trigger Modes
+## Trigger Mode
 
-This project supports two trigger modes:
-
-### Primary
+This project uses the following primary trigger:
 
 Notion Database Automation
 -> Cloudflare Workers
@@ -45,10 +43,6 @@ Notion Database Automation
 -> GitHub Actions
 
 This provides near real-time sync.
-
-### Fallback
-
-A scheduled GitHub Actions workflow runs once per day at `03:00 JST` (`18:00 UTC`) to self-heal any missed webhook events.
 
 ## Cloudflare Worker
 
@@ -86,8 +80,7 @@ Check these behaviors after setup:
 
 1. Editing a Notion `Date` triggers sync within tens of seconds.
 2. A `repository_dispatch` event starts GitHub Actions.
-3. The scheduled fallback runs once per day.
-4. Missed webhook events self-heal on the next scheduled run.
+3. Manual runs from GitHub Actions > `Sync Notion Date Gap` > `Run workflow` also succeed when needed.
 
 ## License
 
